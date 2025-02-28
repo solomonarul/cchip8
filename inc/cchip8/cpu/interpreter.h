@@ -3,6 +3,7 @@
 #define CHIP8_INTERPTERER_H
 
 #include "../state.h"
+#include <stdbool.h>
 
 struct chip8_interpreter
 {

@@ -3,6 +3,7 @@
 #define CHIP8_STATE_H
 
 #include <stdio.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 typedef uint8_t(*chip8_read_b_f)(void*, uint16_t);

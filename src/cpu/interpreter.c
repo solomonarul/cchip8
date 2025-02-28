@@ -326,11 +326,13 @@ void chip8_interpreter_step(chip8_interpreter_t* self)
 
         // BCD Vx
         case 0x33:
+        {
             uint8_t value = state->v[X];
             for(uint8_t index = 0; index < 3; index++)
                 state->write_b(state->aux_arg, state->i + 2 - index, value % 10), value /= 10;
             state->pc += 2;
             break;
+        }
 
         // STR Vx
         case 0x55:
