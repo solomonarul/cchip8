@@ -5,6 +5,7 @@
 void chip8_state_init(chip8_state_t* self)
 {
     self->pc = 0x200;
+    self->mode = CHIP8_MODE_NORMAL;
     memset(self->v, 0x00, sizeof(uint8_t) * 0x10);
     self->read_b = NULL; self->read_w = NULL; self->write_b = NULL; self->sp = 0x00;
     self->dt = 0; self->st = 0; self->last_key = 0x10; self->get_random = NULL;

@@ -34,7 +34,14 @@ void chip8_interpreter_step(chip8_interpreter_t* self)
     assert(state->read_w != NULL);
     assert(state->read_b != NULL);
     assert(state->write_b != NULL);
-    const uint16_t opcode = state->read_w(state->aux_arg, state->pc);
+    uint16_t opcode = state->read_w(state->aux_arg, state->pc);
+    if(state->mode == CHIP8_MODE_NORMAL && self->state->pc == 0x200 && opcode == 0x1260)
+    {
+        state->mode = CHIP8_MODE_HIRES;
+        assert(self->state->resize != NULL);
+        self->state->resize(state->aux_arg, 64, 64);
+        opcode = 0x12C0;
+    }
 
     #define NOOO (opcode & 0xF000)
     #define OOON (opcode & 0x000F)
