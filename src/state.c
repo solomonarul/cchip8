@@ -8,8 +8,9 @@ void chip8_state_init(chip8_state_t* self)
     self->mode = CHIP8_MODE_NORMAL;
     memset(self->v, 0x00, sizeof(uint8_t) * 0x10);
     self->read_b = NULL; self->read_w = NULL; self->write_b = NULL; self->sp = 0x00;
-    self->dt = 0; self->st = 0; self->last_key = 0x10; self->get_random = NULL;
-    self->draw_sprite = NULL; self->clear_screen = NULL; self->get_key_status = NULL;
+    self->dt = 0; self->st = 0; self->last_key = 0x10; self->get_random = NULL; self->resize = NULL;
+    self->draw_sprite = NULL; self->clear_screen = NULL; self->get_key_status = NULL; self->scroll = NULL;
+    self->lowres_font_address = 0; self->hires_font_address = 5 * 0x10;
     self->draw_flag = false;
     self->aux_arg = NULL;
 }

@@ -405,8 +405,19 @@ void chip8_interpreter_step(chip8_interpreter_t* self)
 
         // SPRT Vx
         case 0x29:
-            state->i = 5 * (state->v[X] & 0xF);
+            state->i = state->lowres_font_address + 5 * (state->v[X] & 0xF);
             state->pc += 2;
+            break;
+        
+        // HISPRT Vx
+        case 0x30:
+            if(state->mode == CHIP8_MODE_SCHIP_MODERN)
+            {
+                state->i = state->hires_font_address + 10 * (state->v[X] & 0xF);
+                state->pc += 2;
+            }
+            else
+                chip8_intepreter_log_error(self, opcode);
             break;
 
         // BCD Vx

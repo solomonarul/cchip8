@@ -33,6 +33,7 @@ struct chip8_state
     uint16_t pc, i, stack[0x100];
     uint8_t display_width, display_height;
     uint8_t v[0x10], sp, dt, st, last_key;
+    uint16_t lowres_font_address, hires_font_address;
     chip8_read_b_f read_b;
     chip8_read_w_f read_w;
     chip8_write_b_f write_b;
