@@ -35,13 +35,6 @@ void chip8_interpreter_step(chip8_interpreter_t* self)
     assert(state->read_b != NULL);
     assert(state->write_b != NULL);
     uint16_t opcode = state->read_w(state->aux_arg, state->pc);
-    if(state->mode == CHIP8_MODE_NORMAL && self->state->pc == 0x200 && opcode == 0x1260)
-    {
-        state->mode = CHIP8_MODE_HIRES;
-        assert(self->state->resize != NULL);
-        self->state->resize(state->aux_arg, 64, 64);
-        opcode = 0x12C0;
-    }
 
     #define NOOO (opcode & 0xF000)
     #define OOON (opcode & 0x000F)
@@ -54,6 +47,19 @@ void chip8_interpreter_step(chip8_interpreter_t* self)
     case 0x0000:
         switch(OONN)
         {
+        // Scroll down (TODO: this is so bad...)
+        case 0xC0: case 0xC1: case 0xC2: case 0xC3: case 0xC4: case 0xC5: case 0xC6: case 0xC7:
+        case 0xC8: case 0xC9: case 0xCA: case 0xCB: case 0xCC: case 0xCD: case 0xCE: case 0XCF:
+            if(state->mode == CHIP8_MODE_SCHIP_MODERN)
+            {
+                assert(state->scroll != NULL);
+                state->scroll(state->aux_arg, OOON, CHIP8_SCROLL_DOWN);
+                state->pc += 2;
+            }
+            else
+                chip8_intepreter_log_error(self, opcode);
+            break;
+
         // CLS
         case 0xE0:
             assert(state->clear_screen != NULL);
@@ -65,6 +71,66 @@ void chip8_interpreter_step(chip8_interpreter_t* self)
         case 0xEE:
             assert(state->sp > 0);
             state->pc = state->stack[--state->sp] + 2;
+            break;
+
+        // Scroll right.
+        case 0xFB:
+            if(state->mode == CHIP8_MODE_SCHIP_MODERN)
+            {
+                assert(state->scroll != NULL);
+                state->scroll(state->aux_arg, 4, CHIP8_SCROLL_RIGHT);
+                state->pc += 2;
+            }
+            else
+                chip8_intepreter_log_error(self, opcode);
+            break;
+
+        // Scroll left.
+        case 0xFC:
+            if(state->mode == CHIP8_MODE_SCHIP_MODERN)
+            {
+                assert(state->scroll != NULL);
+                state->scroll(state->aux_arg, 4, CHIP8_SCROLL_LEFT);
+                state->pc += 2;
+            }
+            else
+                chip8_intepreter_log_error(self, opcode);
+            break;
+
+        // QUIT on SCHIP
+        case 0xFD:
+            if(state->mode == CHIP8_MODE_SCHIP_MODERN)
+                self->running = false;
+            else
+                chip8_intepreter_log_error(self, opcode);
+            break;
+
+        // LOWRES on SCHIP
+        case 0xFE:
+            if(state->mode == CHIP8_MODE_SCHIP_MODERN)
+            {
+                assert(state->resize != NULL);
+                assert(state->clear_screen != NULL);
+                state->resize(state->aux_arg, 64, 32);
+                state->clear_screen(state->aux_arg);
+                state->pc += 2;
+            }
+            else
+                chip8_intepreter_log_error(self, opcode);
+            break;
+
+        // HIRES on SCHIP
+        case 0xFF:
+            if(state->mode == CHIP8_MODE_SCHIP_MODERN)
+            {
+                assert(state->resize != NULL);
+                assert(state->clear_screen != NULL);
+                state->resize(state->aux_arg, 128, 64);
+                state->clear_screen(state->aux_arg);
+                state->pc += 2;
+            }
+            else
+                chip8_intepreter_log_error(self, opcode);
             break;
 
         default:
@@ -138,21 +204,24 @@ void chip8_interpreter_step(chip8_interpreter_t* self)
         // OR Vx, Vy
         case 0x1:
             state->v[X] |= state->v[Y];
-            state->v[0xF] = 0x00; // NOTE: only in vanilla CHIP8. Check quirks test,
+            if(state->mode == CHIP8_MODE_NORMAL) // NOTE: only in vanilla CHIP8. Check quirks test,
+                state->v[0xF] = 0x00;
             state->pc += 2; 
             break;
         
         // AND Vx, Vy
         case 0x2:
             state->v[X] &= state->v[Y];
-            state->v[0xF] = 0x00; // NOTE: only in vanilla CHIP8. Check quirks test,
+            if(state->mode == CHIP8_MODE_NORMAL) // NOTE: only in vanilla CHIP8. Check quirks test,
+                state->v[0xF] = 0x00;
             state->pc += 2;
             break;
 
         // XOR Vx, Vy
         case 0x3:
             state->v[X] ^= state->v[Y];
-            state->v[0xF] = 0x00; // NOTE: only in vanilla CHIP8. Check quirks test,
+            if(state->mode == CHIP8_MODE_NORMAL) // NOTE: only in vanilla CHIP8. Check quirks test,
+                state->v[0xF] = 0x00;
             state->pc += 2; 
             break;
 
@@ -180,7 +249,10 @@ void chip8_interpreter_step(chip8_interpreter_t* self)
         case 0x6:
         {
             const uint8_t flag = state->v[X] & 1;
-            state->v[X] = state->v[Y] >> 1;
+            if(state->mode == CHIP8_MODE_SCHIP_MODERN)
+                state->v[X] = state->v[X] >> 1;
+            else
+                state->v[X] = state->v[Y] >> 1;
             state->v[0xF] = flag;
             state->pc += 2; 
             break;
@@ -200,7 +272,10 @@ void chip8_interpreter_step(chip8_interpreter_t* self)
         case 0xE:
         {
             const uint8_t flag = state->v[X] & (1 << 7);
-            state->v[X] = state->v[Y] << 1;
+            if(state->mode == CHIP8_MODE_SCHIP_MODERN)
+                state->v[X] = state->v[X] << 1;
+            else
+                state->v[X] = state->v[Y] << 1;
             state->v[0xF] = flag >> 7;
             state->pc += 2; 
             break;
@@ -232,9 +307,12 @@ void chip8_interpreter_step(chip8_interpreter_t* self)
         state->pc += 2;
         break;
 
-    // JMP V0 + NNN
+    // JMP V0 + NNN / Vx + NNN
     case 0xB000:
-        state->pc = ONNN + state->v[0];
+        if(state->mode == CHIP8_MODE_NORMAL)
+            state->pc = ONNN + state->v[0];
+        else
+            state->pc = ONNN + state->v[X];
         break;
 
     // RND Vx, NN
@@ -246,7 +324,7 @@ void chip8_interpreter_step(chip8_interpreter_t* self)
     // DRW, X, Y, N
     case 0xD000:
         assert(state->draw_sprite != NULL);
-        if(state->draw_flag)
+        if(state->draw_flag || state->mode == CHIP8_MODE_SCHIP_MODERN)
         {
             state->v[0xF] = state->draw_sprite(state->aux_arg, state->i, state->v[X], state->v[Y], OOON);
             state->pc += 2;
@@ -345,7 +423,8 @@ void chip8_interpreter_step(chip8_interpreter_t* self)
         case 0x55:
             for(uint8_t index = 0; index <= X; index++)
                 state->write_b(state->aux_arg, state->i + index, state->v[index]);
-            state->i += X + 1;  // NOTE: only in vanilla CHIP8. Check quirks test.
+            if(state->mode == CHIP8_MODE_NORMAL) // NOTE: only in vanilla CHIP8. Check quirks test,
+                state->i += X + 1;
             state->pc += 2;
             break;
 
@@ -353,7 +432,8 @@ void chip8_interpreter_step(chip8_interpreter_t* self)
         case 0x65:
             for(uint8_t index = 0; index <= X; index++)
                 state->v[index] = state->read_b(state->aux_arg, state->i + index);
-            state->i += X + 1; // NOTE: only in vanilla CHIP8. Check quirks test,
+            if(state->mode == CHIP8_MODE_NORMAL) // NOTE: only in vanilla CHIP8. Check quirks test,
+                state->i += X + 1;
             state->pc += 2;
             break;        
 

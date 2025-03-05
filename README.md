@@ -2,9 +2,11 @@
 
 CCHIP8 is a module for the [edra](https://github.com/solomonarul/edra) emulator, designed with simplicity and agnosticism first.
 
-That means that it is incredibly simple to run it on your own by just creating your own CHIP8 context.
+That means that it is incredibly simple to run it on your own by just creating your own CHIP8 context, the library just provides the building blocks for you to play around with.
 
-NOTE: There are no examples, for now use [edra's](https://github.com/solomonarul/edra/blob/main/inc/drivers/chip8.h) as a sample.
+### Examples:
+
+- Check out [edra](https://github.com/solomonarul/edra)'s usage [here.](https://github.com/solomonarul/edra/blob/main/inc/drivers/chip8.h)
 
 ---
 

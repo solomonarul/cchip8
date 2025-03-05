@@ -16,15 +16,22 @@ typedef uint8_t(*chip8_get_dt_f)(void*);
 typedef bool(*chip8_key_status_f)(void*, uint8_t);
 typedef uint8_t(*chip8_random_f)(void*);
 typedef void(*chip8_resize_f)(void*, uint8_t, uint8_t);
+typedef enum {
+    CHIP8_SCROLL_DOWN = 0,
+    CHIP8_SCROLL_LEFT,
+    CHIP8_SCROLL_RIGHT,
+} chip8_scroll_direction_t;
+typedef void(*chip8_scroll_f)(void*, uint8_t, chip8_scroll_direction_t);
 
 struct chip8_state
 {
     bool draw_flag;
     enum {
         CHIP8_MODE_NORMAL = 0,
-        CHIP8_MODE_HIRES = 1
+        CHIP8_MODE_SCHIP_MODERN
     } mode;
     uint16_t pc, i, stack[0x100];
+    uint8_t display_width, display_height;
     uint8_t v[0x10], sp, dt, st, last_key;
     chip8_read_b_f read_b;
     chip8_read_w_f read_w;
@@ -34,6 +41,7 @@ struct chip8_state
     chip8_key_status_f get_key_status;
     chip8_random_f get_random;
     chip8_resize_f resize;
+    chip8_scroll_f scroll;
     void* aux_arg;
 };
 typedef struct chip8_state chip8_state_t;
