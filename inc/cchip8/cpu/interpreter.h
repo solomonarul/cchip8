@@ -1,6 +1,6 @@
 #pragma once
-#ifndef CHIP8_INTERPTERER_H
-#define CHIP8_INTERPTERER_H
+#ifndef CHIP8_INTERPRETER_H
+#define CHIP8_INTERPRETER_H
 
 #include "../state.h"
 #include <stdbool.h>
