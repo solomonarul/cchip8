@@ -23,7 +23,7 @@ typedef enum {
 } chip8_scroll_direction_t;
 typedef void(*chip8_scroll_f)(void*, uint8_t, chip8_scroll_direction_t);
 
-struct chip8_state
+typedef struct chip8_state
 {
     bool draw_flag;
     enum {
@@ -44,8 +44,7 @@ struct chip8_state
     chip8_resize_f resize;
     chip8_scroll_f scroll;
     void* aux_arg;
-};
-typedef struct chip8_state chip8_state_t;
+} chip8_state_t;
 
 void chip8_state_init(chip8_state_t* self);
 void chip8_state_log(chip8_state_t* self, FILE* file);
