@@ -35,7 +35,7 @@ set_property(
     PROPERTY C_STANDARD 17
 )
 
-if(CMAKE_BUILD_TYPE MATCHES "Debug")
+if(BUILD_TESTS)
 add_executable(
     ${PROJECT_NAME}_test
     ${${PROJECT_NAME}_TEST_SRC}
