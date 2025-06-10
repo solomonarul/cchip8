@@ -23,13 +23,15 @@ typedef enum {
 } chip8_scroll_direction_t;
 typedef void(*chip8_scroll_f)(void*, uint8_t, chip8_scroll_direction_t);
 
+typedef enum chip8_run_mode {
+    CHIP8_MODE_NORMAL = 0,
+    CHIP8_MODE_SCHIP_MODERN
+} chip8_run_mode_t;
+
 typedef struct chip8_state
 {
     bool draw_flag;
-    enum {
-        CHIP8_MODE_NORMAL = 0,
-        CHIP8_MODE_SCHIP_MODERN
-    } mode;
+    chip8_run_mode_t mode;
     uint16_t pc, i, stack[0x100];
     uint8_t display_width, display_height;
     uint8_t v[0x10], sp, dt, st, last_key;
