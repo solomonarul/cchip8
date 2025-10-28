@@ -53,5 +53,9 @@ set_property(
     TARGET ${PROJECT_NAME}_test
     PROPERTY C_STANDARD 17
 )
+
+install(
+    TARGETS ${PROJECT_NAME}_test
+)
 endif()
 
