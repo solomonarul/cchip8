@@ -8,12 +8,6 @@ file(
         "src/*.c"
 )
 
-file(
-    GLOB_RECURSE
-    ${PROJECT_NAME}_TEST_SRC
-        "test/*.c"
-)
-
 add_library(
     ${PROJECT_NAME}
     STATIC
@@ -34,28 +28,4 @@ set_property(
     TARGET ${PROJECT_NAME}
     PROPERTY C_STANDARD 17
 )
-
-if(BUILD_TESTS)
-add_executable(
-    ${PROJECT_NAME}_test
-    ${${PROJECT_NAME}_TEST_SRC}
-)
-
-target_compile_options(${PROJECT_NAME}_test PRIVATE -Wall -Wextra -Wpedantic -Werror)
-
-target_link_libraries(
-    ${PROJECT_NAME}_test
-    PUBLIC
-        ${PROJECT_NAME}
-)
-
-set_property(
-    TARGET ${PROJECT_NAME}_test
-    PROPERTY C_STANDARD 17
-)
-
-install(
-    TARGETS ${PROJECT_NAME}_test
-)
-endif()
 
